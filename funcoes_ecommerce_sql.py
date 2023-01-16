@@ -176,14 +176,18 @@ def consultar_carrinho(pago, valor_pago):
     sleep(0.2)
     print("\033[0;33mSegue abaixo o valor total do seu carrinho:\033[m")
     sleep(1)
-    if len(cart) != 0:
-        for produto_no_carrinho in cart:
-            quantidade = produto_no_carrinho["amount"]
+    cursor.execute("SELECT * FROM dados")
+    resultado = cursor.fetchall()
+    if resultado != []:
+        for produto in resultado:
+            quantidade = int(produto[3])
+            preço = float(produto[2])
             if quantidade > 1:
-                soma += produto_no_carrinho["price"] * quantidade
+                soma += preço * quantidade
             else:
-                soma += produto_no_carrinho["price"]
+                soma += preço
     else:
+        sleep(1)
         print(f"\033[0;32mA soma do seu carrinho deu R$0.00!\033[m")
         return pago, valor_pago
     print(f"\033[0;32mA soma do seu carrinho deu R${soma:.2f}!\033[m")
