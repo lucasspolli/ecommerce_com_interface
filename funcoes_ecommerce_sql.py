@@ -85,7 +85,8 @@ def adicionar_produto():
                 cursor.execute(f"SELECT * FROM dados WHERE id = {product}")
                 resultado = cursor.fetchall()
                 if resultado == []:
-                    comando = f"INSERT INTO dados (nome, id, preço, quantidade) VALUES('{name}', '{product}', '{price}', '{amount}')"
+                    pago = 'nao'
+                    comando = f"INSERT INTO dados (nome, id, preço, quantidade, pago) VALUES('{name}', '{product}', '{price}', '{amount}', '{pago}')"
                     cursor.execute(comando)
                     print(f"\033[0;32m{name} adicionado ao carrinho!\033[m")
                     added = True
@@ -127,7 +128,7 @@ def remover_produto():
     resultado = cursor.fetchall()
     for item in resultado:
         sleep(0.5)
-        print(item[0],"      ", item[1], "       ", item[2], "       ", item[3])
+        print('Produtos:')
     sleep(0.5)
     # TIRAR VARIÁVEL
     var = True
@@ -156,7 +157,9 @@ def remover_produto():
                         quantidade -= 1
                         cursor.execute(f"SELECT * FROM dados WHERE id = {id}")
                         resultado = cursor.fetchall()
+                        ##############
                         cursor.execute(f"UPDATE dados SET quantidade = {quantidade} WHERE id = {id}")
+                        ##############
                         connection.commit()
                         print(f"\033[0;32mUm(a) dos(as) {resultado[0][0]} foi removido do carrinho!\033[m")
                         break
@@ -170,7 +173,7 @@ def remover_produto():
                 print(f"\033[0;31mDigite um número!\033[m")
     
 # CONSULTAR VALOR DO CARRINHO
-def consultar_carrinho(pago, valor_pago):
+def consultar_carrinho(valor_pago):
     soma = 0
     print("="*57)
     sleep(0.2)
@@ -180,67 +183,75 @@ def consultar_carrinho(pago, valor_pago):
     resultado = cursor.fetchall()
     if resultado != []:
         for produto in resultado:
-            quantidade = int(produto[3])
-            preço = float(produto[2])
-            if quantidade > 1:
-                soma += preço * quantidade
-            else:
-                soma += preço
+            if produto[4] == 'nao':
+                quantidade = int(produto[3])
+                preço = float(produto[2])
+                if quantidade > 1:
+                    soma += preço * quantidade
+                else:
+                    soma += preço
     else:
         sleep(1)
         print(f"\033[0;32mA soma do seu carrinho deu R$0.00!\033[m")
-        return pago, valor_pago
+        sleep(0.5)
+        print(f"\033[0;32mNão tem nada à ser pago aqui!\033[m")
+        sleep(1)
+        return valor_pago
     print(f"\033[0;32mA soma do seu carrinho deu R${soma:.2f}!\033[m")
-    sleep(1)
-    if pago == True:
-        if soma != valor_pago:
-            print("\033[0;33mVocê tem produtos que não foram pagos! \033[m")
-            soma -= valor_pago
-            sleep(1)
-            print(f"\033[0;33mA diferença é de R${soma:.2f}! \033[m")
-            pago = False
-    while True:
-        if pago == False:
-            sleep(1)
-            escolha = str(input("\033[0;33mVocê deseja pagar a sua conta? (sim/nao) \033[m"))
-            if escolha in "nao":
-                break
-            elif escolha in "sim":
-                sleep(0.2)
-                print("="*57)
-                sleep(0.2)
-                print("1 - Pagar no dinheiro")
-                sleep(0.2)
-                print("2 - Pagar no débito")
-                sleep(0.2)
-                print("3 - Pagar no crédito")
-                sleep(0.2)
-                opcao = int(input("\033[0;33mComo você deseja pagar a sua conta? \033[m"))
+    cursor.execute("SELECT * FROM dados")
+    resultado = cursor.fetchall()
+    sim = 'sim'
+    for produto in resultado:
+        if produto[4] == 'nao':
+            print(soma, valor_pago)
+            if soma != valor_pago:
                 sleep(1)
-                if opcao == 1:
-                    print(f"\033[0;32mVocê pagou R${soma:.2f} no dinheiro à vista!\033[m")
-                    pago = True
-                    valor_pago += soma
-                    break
-                elif opcao == 2:
-                    print(f"\033[0;32mVocê pagou R${soma:.2f} no débito!\033[m")
-                    pago = True
-                    valor_pago += soma
-                    break
-                elif opcao == 3:
-                    parcelas = int(input("\033[0;33mEm quantas parcelas você deseja pagar a sua conta? \033[m"))
+                print("\033[0;33mVocê tem produtos que não foram pagos! \033[m")
+                sleep(1)
+                print(f"\033[0;33mA diferença é de R${soma:.2f}! \033[m")
+                while True:
                     sleep(1)
-                    parcelado = soma / parcelas
-                    print(f"\033[0;32mVocê irá pagar {parcelas}x de R${parcelado:.2f} no crédito!\033[m")
-                    pago = True
-                    valor_pago += soma
-                    break
-                else:
-                    print(f"\033[0;31mDigite uma opção válida!\033[m")
+                    escolha = str(input("\033[0;33mVocê deseja pagar a sua conta? (sim/nao) \033[m"))
+                    if escolha in "nao":
+                        break
+                    elif escolha in "sim":
+                        sleep(0.2)
+                        print("="*57)
+                        sleep(0.2)
+                        print("1 - Pagar no dinheiro")
+                        sleep(0.2)
+                        print("2 - Pagar no débito")
+                        sleep(0.2)
+                        print("3 - Pagar no crédito")
+                        sleep(0.2)
+                        opcao = int(input("\033[0;33mComo você deseja pagar a sua conta? \033[m"))
+                        sleep(1)
+                        if opcao == 1:
+                            print(f"\033[0;32mVocê pagou R${soma:.2f} no dinheiro à vista!\033[m")
+                            cursor.execute("UPDATE dados SET pago = '"+sim+"'")
+                            connection.commit()
+                            valor_pago += soma
+                            return valor_pago
+                        elif opcao == 2:
+                            print(f"\033[0;32mVocê pagou R${soma:.2f} no débito!\033[m")
+                            cursor.execute("UPDATE dados SET pago = '"+sim+"'")
+                            connection.commit()
+                            valor_pago += soma
+                            return valor_pago
+                        elif opcao == 3:
+                            parcelas = int(input("\033[0;33mEm quantas parcelas você deseja pagar a sua conta? \033[m"))
+                            sleep(1)
+                            parcelado = soma / parcelas
+                            print(f"\033[0;32mVocê irá pagar {parcelas}x de R${parcelado:.2f} no crédito!\033[m")
+                            cursor.execute("UPDATE dados SET pago = '"+sim+"'")
+                            connection.commit()
+                            valor_pago += soma
+                            return valor_pago
+                        else:
+                            print(f"\033[0;31mDigite uma opção válida!\033[m")
+                    else:
+                        print(f"\033[0;31mDigite apenas: sim/nao\033[m")
             else:
-                print(f"\033[0;31mDigite apenas: sim/nao\033[m")
-        else:
-            sleep(1)
-            print(f"\033[0;32mA sua conta de R${soma:.2f} já foi paga!\033[m")
-            break
-    return pago, valor_pago
+                sleep(1)
+                print(f"\033[0;32mA sua conta de R${soma:.2f} já foi paga!\033[m")
+                return valor_pago
