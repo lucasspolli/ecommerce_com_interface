@@ -1,2 +1,2 @@
 # ecommerce
-Projeto do ecommerce com python, sendo aperfeiçoado sempre que finalizada uma etapa
+Projeto do ecommerce com uma interface desenvolvido em python com banco de dados, sendo aperfeiçoado sempre que finalizada uma etapa
