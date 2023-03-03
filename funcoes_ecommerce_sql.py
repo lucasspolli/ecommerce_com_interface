@@ -123,12 +123,13 @@ def remover_produto():
     sleep(0.2)
     print("\033[0;32mSegue abaixo os itens contidos no seu carrinho:\033[m")
     sleep(0.5)
-    print("\033[0;33mNome                    Id          Preço      Quantidade\033[m")
+    print("\033[0;33mNome                  ID          Preço       Quantidade\033[m")
     cursor.execute(f"SELECT * FROM dados")
     resultado = cursor.fetchall()
+    print('Produtos:')
     for item in resultado:
         sleep(0.5)
-        print('Produtos:')
+        print(item[0], f"{item[1]:>12}", f"{item[2]:>15}", f"{item[3]:>10}")
     sleep(0.5)
     # TIRAR VARIÁVEL
     var = True
